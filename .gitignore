@@ -1,0 +1,15 @@
+﻿.venv
+.venv311
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.swp
+*.swo
+*.DS_Store
+.vscode/
+.git_status_info.txt
+.git_status_utf8.txt
+git_report.txt
+git_report_utf8.txt
+status.txt
