@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍅 番茄钟 - AI学习伙伴</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 700px; margin: 0 auto; }
+        
+        .navbar {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .navbar h1 { color: #667eea; font-size: 24px; }
+        .nav-links { display: flex; gap: 12px; }
+        .nav-links a {
+            padding: 8px 18px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .nav-links a:hover { background: #5a6fd6; }
+        
+        .timer-panel {
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+            margin-bottom: 24px;
+        }
+        .timer-display {
+            font-size: 100px;
+            font-weight: 200;
+            color: #333;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            letter-spacing: -4px;
+            margin-bottom: 8px;
+        }
+        .timer-label {
+            font-size: 18px;
+            color: #888;
+            margin-bottom: 30px;
+        }
+        
+        .subject-select {
+            padding: 10px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            margin-bottom: 24px;
+            background: white;
+        }
+        
+        .timer-buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+        .btn {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-start {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        .btn-start:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,0.4); }
+        .btn-pause {
+            background: #f39c12;
+            color: white;
+        }
+        .btn-pause:hover { background: #e67e22; }
+        .btn-stop {
+            background: #e74c3c;
+            color: white;
+        }
+        .btn-stop:hover { background: #c0392b; }
+        .btn-resume {
+            background: #27ae60;
+            color: white;
+        }
+        .btn-resume:hover { background: #229954; }
+        
+        .today-stats {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            margin-bottom: 24px;
+        }
+        .today-stats h3 { color: #333; margin-bottom: 16px; }
+        .stats-row { display: flex; gap: 40px; justify-content: center; }
+        .stat-item .num { font-size: 36px; font-weight: bold; color: #667eea; }
+        .stat-item .txt { color: #888; font-size: 14px; margin-top: 4px; }
+        
+        .tips {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .tips h3 { color: #333; margin-bottom: 12px; }
+        .tips ul { color: #666; line-height: 2; padding-left: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar">
+            <h1>🍅 番茄钟</h1>
+            <div class="nav-links">
+                <a href="/">🏠 首页</a>
+                <a href="/notes">📝 笔记</a>
+                <a href="/pomodoro">🍅 番茄钟</a>
+            </div>
+        </nav>
+        
+        <div class="timer-panel">
+            <div class="timer-display" id="timer-display">25:00</div>
+            <div class="timer-label" id="timer-label">准备开始</div>
+            
+            <select class="subject-select" id="pomo-subject">
+                <option value="通用">📚 学习</option>
+                <option value="数学">🔢 数学</option>
+                <option value="英语">🇬🇧 英语</option>
+                <option value="编程">💻 编程</option>
+                <option value="阅读">📖 阅读</option>
+            </select>
+            
+            <div class="timer-buttons">
+                <button class="btn btn-start" id="btn-start" onclick="startTimer()">▶️ 开始</button>
+                <button class="btn btn-pause" id="btn-pause" onclick="pauseTimer()" style="display:none">⏸️ 暂停</button>
+                <button class="btn btn-resume" id="btn-resume" onclick="resumeTimer()" style="display:none">▶️ 继续</button>
+                <button class="btn btn-stop" id="btn-stop" onclick="stopTimer()" style="display:none">⏹️ 停止</button>
+            </div>
+        </div>
+        
+        <div class="today-stats">
+            <h3>📊 今日进度</h3>
+            <div class="stats-row">
+                <div class="stat-item">
+                    <div class="num">{{ today_pomodoro }}</div>
+                    <div class="txt">🍅 完成番茄钟</div>
+                </div>
+                <div class="stat-item">
+                    <div class="num">{{ today_minutes }}</div>
+                    <div class="txt">⏱️ 累计分钟</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tips">
+            <h3>💡 番茄工作法小贴士</h3>
+            <ul>
+                <li>每工作 25 分钟，休息 5 分钟</li>
+                <li>每完成 4 个番茄钟，休息 15-30 分钟</li>
+                <li>专注期间关闭社交媒体和通知</li>
+                <li>选择一个明确的学习目标</li>
+                <li>保持规律作息，固定番茄钟时间</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+    let totalSeconds = 25 * 60;
+    let remaining = totalSeconds;
+    let timerInterval = null;
+    let isRunning = false;
+    
+    const BTN_START = document.getElementById('btn-start');
+    const BTN_PAUSE = document.getElementById('btn-pause');
+    const BTN_RESUME = document.getElementById('btn-resume');
+    const BTN_STOP = document.getElementById('btn-stop');
+    const DISPLAY = document.getElementById('timer-display');
+    const LABEL = document.getElementById('timer-label');
+    
+    function formatTime(seconds) {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m}:${s.toString().padStart(2, '0')}`;
+    }
+    
+    function updateDisplay() {
+        DISPLAY.textContent = formatTime(remaining);
+    }
+    
+    function startTimer() {
+        isRunning = true;
+        totalSeconds = 25 * 60;
+        remaining = totalSeconds;
+        LABEL.textContent = '专注学习中...';
+        
+        BTN_START.style.display = 'none';
+        BTN_PAUSE.style.display = 'inline-block';
+        BTN_STOP.style.display = 'inline-block';
+        
+        timerInterval = setInterval(() => {
+            remaining--;
+            updateDisplay();
+            
+            if (remaining <= 0) {
+                clearInterval(timerInterval);
+                isRunning = false;
+                LABEL.textContent = '🎉 时间到！休息一下吧';
+                DISPLAY.textContent = '00:00';
+                alert('🍅 恭喜完成一个番茄钟！休息5分钟吧~');
+                recordPomodoro();
+                
+                BTN_PAUSE.style.display = 'none';
+                BTN_STOP.style.display = 'none';
+                BTN_START.style.display = 'inline-block';
+            }
+        }, 1000);
+    }
+    
+    function pauseTimer() {
+        clearInterval(timerInterval);
+        isRunning = false;
+        LABEL.textContent = '已暂停';
+        
+        BTN_PAUSE.style.display = 'none';
+        BTN_RESUME.style.display = 'inline-block';
+        BTN_STOP.style.display = 'inline-block';
+    }
+    
+    function resumeTimer() {
+        isRunning = true;
+        LABEL.textContent = '专注学习中...';
+        
+        BTN_RESUME.style.display = 'none';
+        BTN_PAUSE.style.display = 'inline-block';
+        
+        timerInterval = setInterval(() => {
+            remaining--;
+            updateDisplay();
+            
+            if (remaining <= 0) {
+                clearInterval(timerInterval);
+                isRunning = false;
+                LABEL.textContent = '🎉 时间到！';
+                DISPLAY.textContent = '00:00';
+                alert('🍅 恭喜完成一个番茄钟！');
+                recordPomodoro();
+                
+                BTN_PAUSE.style.display = 'none';
+                BTN_STOP.style.display = 'none';
+                BTN_START.style.display = 'inline-block';
+            }
+        }, 1000);
+    }
+    
+    function stopTimer() {
+        clearInterval(timerInterval);
+        isRunning = false;
+        remaining = totalSeconds;
+        updateDisplay();
+        LABEL.textContent = '已停止';
+        
+        BTN_PAUSE.style.display = 'none';
+        BTN_RESUME.style.display = 'none';
+        BTN_STOP.style.display = 'none';
+        BTN_START.style.display = 'inline-block';
+    }
+    
+    async function recordPomodoro() {
+        const subject = document.getElementById('pomo-subject').value;
+        try {
+            await fetch('/pomodoro', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({action: 'record', duration: 25, subject})
+            });
+            location.reload();
+        } catch (e) {
+            console.error('记录失败', e);
+        }
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}学习仪表盘{% endblock %}
+{% block content %}
+<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;">
+    <h2 style="font-size:22px;">📊 学习仪表盘</h2>
+    <span style="font-size:13px; color:#888;" id="update-time"></span>
+</div>
+
+<div class="grid-3" style="margin-bottom:24px;">
+    <div class="stat-card">
+        <div class="stat-number" id="stat-records">-</div>
+        <div class="stat-label">学习记录（次）</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number" id="stat-minutes">-</div>
+        <div class="stat-label">总学习时长（分钟）</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number" id="stat-subjects">-</div>
+        <div class="stat-label">学习科目数</div>
+    </div>
+</div>
+
+<div class="grid-2">
+    <div class="card">
+        <div class="card-title">📈 近30天学习趋势</div>
+        <canvas id="trendChart" height="200"></canvas>
+    </div>
+    <div class="card">
+        <div class="card-title">📚 科目时间分布</div>
+        <canvas id="subjectChart" height="200"></canvas>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-title">📋 近期学习记录</div>
+    <table>
+        <thead><tr><th>日期</th><th>科目</th><th>主题</th><th>时长</th><th>理解度</th><th>疲劳度</th></tr></thead>
+        <tbody id="records-tbody"><tr><td colspan="6" style="text-align:center;color:#888;">加载中...</td></tr></tbody>
+    </table>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(async () => {
+    const stats = await api('/api/stats');
+    const recordsRes = await api('/api/get_study_records?limit=10');
+
+    document.getElementById('stat-records').textContent = {{ total_records }};
+    document.getElementById('stat-minutes').textContent = {{ total_minutes }};
+    document.getElementById('stat-subjects').textContent = {{ total_subjects }};
+    document.getElementById('update-time').textContent = new Date().toLocaleString('zh-CN');
+
+    // 趋势图
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    const trendData = stats.daily_trend || [];
+    new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: trendData.map(d => d.date?.slice(5) || ''),
+            datasets: [{
+                label: '学习时长(分钟)',
+                data: trendData.map(d => d.minutes || 0),
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102,126,234,0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+    });
+
+    // 科目分布
+    const subjectData = {{ subject_data | tojson }};
+    const subjectCtx = document.getElementById('subjectChart').getContext('2d');
+    new Chart(subjectCtx, {
+        type: 'doughnut',
+        data: {
+            labels: subjectData.map(d => d.subject),
+            datasets: [{
+                data: subjectData.map(d => d.total_min || 0),
+                backgroundColor: ['#667eea','#f093fb','#38ef7d','#f5576c','#4facfe','#ffd26f','#a8edea','#d299c2'],
+                borderWidth: 0
+            }]
+        },
+        options: { responsive: true }
+    });
+
+    // 填充记录表格
+    const tbody = document.getElementById('records-tbody');
+    const records = recordsRes.records || [];
+    if (records.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#888;">暂无记录，<a href="/record">去记录</a></td></tr>';
+    } else {
+        tbody.innerHTML = records.map(r => `
+            <tr>
+                <td>${r.created_at?.slice(0,10) || '-'}</td>
+                <td><span class="tag tag-purple">${r.subject || '-'}</span></td>
+                <td>${r.topic || '-'}</td>
+                <td>${r.duration_minutes}分钟</td>
+                <td><span class="tag ${r.understanding_level >= 4 ? 'tag-green' : r.understanding_level >= 3 ? 'tag-yellow' : 'tag-red'}">${r.understanding_level}/5</span></td>
+                <td><span class="tag ${r.fatigue_level <= 2 ? 'tag-green' : r.fatigue_level <= 3 ? 'tag-yellow' : 'tag-red'}">${r.fatigue_level}/5</span></td>
+            </tr>
+        `).join('');
+    }
+})();
+</script>
+{% endblock %}

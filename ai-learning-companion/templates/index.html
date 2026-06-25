@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 AI学习伙伴</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        /* 导航栏 */
+        .navbar {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .navbar h1 { color: #667eea; font-size: 24px; }
+        .navbar .ai-status { 
+            background: #f0f0f0; 
+            padding: 6px 14px; 
+            border-radius: 20px;
+            font-size: 13px;
+            color: #666;
+        }
+        .nav-links { display: flex; gap: 12px; }
+        .nav-links a {
+            padding: 8px 18px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .nav-links a:hover { background: #5a6fd6; transform: translateY(-1px); }
+        
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .stat-card .icon { font-size: 32px; margin-bottom: 8px; }
+        .stat-card .value { font-size: 32px; font-weight: bold; color: #667eea; }
+        .stat-card .label { color: #888; font-size: 14px; margin-top: 4px; }
+        
+        /* 图表区域 */
+        .chart-section {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .chart-section h2 { color: #333; margin-bottom: 16px; }
+        .chart-bars { display: flex; align-items: flex-end; gap: 12px; height: 150px; padding: 10px 0; }
+        .chart-bar {
+            flex: 1;
+            background: linear-gradient(to top, #667eea, #764ba2);
+            border-radius: 8px 8px 0 0;
+            text-align: center;
+            color: white;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            transition: all 0.3s;
+        }
+        .chart-bar:hover { transform: scaleY(1.05); }
+        .chart-bar .day { padding: 8px 0; font-weight: 500; }
+        .chart-bar .count { background: rgba(0,0,0,0.2); padding: 4px; border-radius: 0 0 8px 8px; }
+        
+        /* AI问答区 */
+        .qa-section {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .qa-section h2 { color: #333; margin-bottom: 16px; }
+        .qa-input-row { display: flex; gap: 12px; margin-bottom: 16px; }
+        .qa-input-row select {
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            background: white;
+        }
+        .qa-input-row input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+        .qa-input-row input:focus, .qa-input-row select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .btn-ask {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-ask:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(102,126,234,0.4); }
+        
+        #qa-response {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 80px;
+            white-space: pre-wrap;
+            line-height: 1.7;
+            display: none;
+        }
+        #qa-response.show { display: block; }
+        .loading { color: #888; text-align: center; }
+        .error-msg { color: #e74c3c; }
+        
+        /* 最近记录 */
+        .recent-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        .recent-box {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .recent-box h3 { color: #333; margin-bottom: 16px; }
+        .recent-item {
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .recent-item:hover { background: #eef0f5; }
+        .recent-item .q { font-weight: 600; color: #333; margin-bottom: 4px; }
+        .recent-item .meta { font-size: 12px; color: #888; }
+        
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .recent-section { grid-template-columns: 1fr; }
+            .navbar { flex-direction: column; gap: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 导航栏 -->
+        <nav class="navbar">
+            <h1>📚 AI学习伙伴</h1>
+            <span class="ai-status">{{ ai_status }}</span>
+            <div class="nav-links">
+                <a href="/">🏠 首页</a>
+                <a href="/ask">💬 AI问答</a>
+                <a href="/notes">📝 笔记</a>
+                <a href="/pomodoro">🍅 番茄钟</a>
+            </div>
+        </nav>
+        
+        <!-- 统计卡片 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="icon">🍅</div>
+                <div class="value">{{ total_pomodoro }}</div>
+                <div class="label">本周番茄钟</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">⏱️</div>
+                <div class="value">{{ total_minutes }}</div>
+                <div class="label">累计分钟</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">❓</div>
+                <div class="value">{{ total_questions }}</div>
+                <div class="label">提问次数</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">📄</div>
+                <div class="value">{{ total_notes }}</div>
+                <div class="label">笔记数量</div>
+            </div>
+        </div>
+        
+        <!-- 学习趋势图 -->
+        <div class="chart-section">
+            <h2>📊 本周学习趋势</h2>
+            <div class="chart-bars" id="week-chart"></div>
+        </div>
+        
+        <!-- AI问答 -->
+        <div class="qa-section">
+            <h2>💬 AI智能问答</h2>
+            <div class="qa-input-row">
+                <select id="subject-select">
+                    <option value="通用">📚 通用</option>
+                    <option value="数学">🔢 数学</option>
+                    <option value="物理">⚡ 物理</option>
+                    <option value="化学">🧪 化学</option>
+                    <option value="英语">🇬🇧 英语</option>
+                    <option value="历史">📜 历史</option>
+                    <option value="编程">💻 编程</option>
+                </select>
+                <input type="text" id="question-input" placeholder="输入你的问题，AI帮你解答..." onkeypress="if(event.key==='Enter')askAI()">
+                <button class="btn-ask" onclick="askAI()">提问</button>
+            </div>
+            <div id="qa-response"></div>
+        </div>
+        
+        <!-- 最近记录 -->
+        <div class="recent-section">
+            <div class="recent-box">
+                <h3>📝 最近的笔记</h3>
+                {% if recent_notes %}
+                    {% for note in recent_notes %}
+                    <div class="recent-item" onclick="location.href='/note/{{ note[0] }}'">
+                        <div class="q">{{ note[1] }}</div>
+                        <div class="meta">{{ note[2] or '无分类' }} · {{ note[3][:10] }}</div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color:#888;text-align:center;padding:20px">暂无笔记，<a href="/notes" style="color:#667eea">去创建</a></p>
+                {% endif %}
+            </div>
+            <div class="recent-box">
+                <h3>💬 最近问答</h3>
+                {% if recent_qa %}
+                    {% for qa in recent_qa %}
+                    <div class="recent-item">
+                        <div class="q">Q: {{ qa[1][:50] }}{% if qa[1]|length > 50 %}...{% endif %}</div>
+                        <div class="meta">{{ qa[3] or '通用' }} · {{ qa[4][:10] }}</div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color:#888;text-align:center;padding:20px">暂无问答，<a href="/" style="color:#667eea">去提问</a></p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    async function askAI() {
+        const question = document.getElementById('question-input').value.trim();
+        const subject = document.getElementById('subject-select').value;
+        const responseEl = document.getElementById('qa-response');
+        
+        if (!question) { alert('请输入问题'); return; }
+        
+        responseEl.className = 'show';
+        responseEl.innerHTML = '<div class="loading">🤔 AI思考中，请稍候...</div>';
+        
+        try {
+            const res = await fetch('/ask', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({question, subject})
+            });
+            const data = await res.json();
+            
+            if (data.success) {
+                responseEl.innerHTML = data.answer;
+                document.getElementById('question-input').value = '';
+            } else {
+                responseEl.innerHTML = '<div class="error-msg">❌ ' + data.error + '</div>';
+            }
+        } catch (e) {
+            responseEl.innerHTML = '<div class="error-msg">❌ 请求失败: ' + e.message + '</div>';
+        }
+    }
+    
+    // 加载图表
+    async function loadChart() {
+        try {
+            const res = await fetch('/api/stats');
+            const data = await res.json();
+            const chartEl = document.getElementById('week-chart');
+            
+            if (!data.week_stats || data.week_stats.length === 0) {
+                chartEl.innerHTML = '<div style="text-align:center;color:#888;width:100%">暂无学习数据</div>';
+                return;
+            }
+            
+            const maxPom = Math.max(...data.week_stats.map(s => s.pomodoro), 1);
+            
+            data.week_stats.forEach(stat => {
+                const height = stat.pomodoro > 0 ? Math.max(10, (stat.pomodoro / maxPom) * 120) : 10;
+                const dayName = ['日','一','二','三','四','五','六'][new Date(stat.date).getDay()];
+                chartEl.innerHTML += `
+                    <div class="chart-bar" style="height:${height + 30}px">
+                        <div class="day">${dayName}</div>
+                        <div class="count">${stat.pomodoro}</div>
+                    </div>
+                `;
+            });
+        } catch (e) {
+            console.error('加载图表失败', e);
+        }
+    }
+    
+    loadChart();
+    </script>
+</body>
+</html>
