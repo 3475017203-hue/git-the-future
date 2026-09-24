@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI多模态创意工作室 ✨</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">🎨</span>
+                <div class="logo-text">
+                    <h1>AI创意工作室</h1>
+                    <small> Multimodal Creative Studio</small>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <div class="nav-section">
+                    <div class="nav-section-title">📄 文档工具</div>
+                    <button class="nav-item active" data-tool="doc-summary">
+                        <span class="nav-icon">📝</span> 文档摘要
+                    </button>
+                    <button class="nav-item" data-tool="doc-qa">
+                        <span class="nav-icon">❓</span> 文档问答
+                    </button>
+                    <button class="nav-item" data-tool="doc-keywords">
+                        <span class="nav-icon">🔑</span> 关键词提取
+                    </button>
+                    <button class="nav-item" data-tool="doc-entities">
+                        <span class="nav-icon">🏷️</span> 实体识别
+                    </button>
+                    <button class="nav-item" data-tool="doc-mindmap">
+                        <span class="nav-icon">🧠</span> 思维导图
+                    </button>
+                    <button class="nav-item" data-tool="doc-flashcards">
+                        <span class="nav-icon">📇</span> 闪卡生成
+                    </button>
+                    <button class="nav-item" data-tool="doc-quiz">
+                        <span class="nav-icon">📋</span> 试题生成
+                    </button>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">✍️ 写作工具</div>
+                    <button class="nav-item" data-tool="writing-polish">
+                        <span class="nav-icon">✨</span> 文本润色
+                    </button>
+                    <button class="nav-item" data-tool="writing-translate">
+                        <span class="nav-icon">🌐</span> 文本翻译
+                    </button>
+                    <button class="nav-item" data-tool="writing-creative">
+                        <span class="nav-icon">📖</span> 创意写作
+                    </button>
+                    <button class="nav-item" data-tool="writing-marketing">
+                        <span class="nav-icon">📣</span> 营销文案
+                    </button>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">🎨 图片工具</div>
+                    <button class="nav-item" data-tool="image-generate">
+                        <span class="nav-icon">🖼️</span> 图片生成
+                    </button>
+                </div>
+                <div class="nav-section">
+                    <div class="nav-section-title">💼 职场工具</div>
+                    <button class="nav-item" data-tool="resume-analyze">
+                        <span class="nav-icon">📊</span> 简历分析
+                    </button>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="api-status" id="apiStatus">
+                    <span class="status-dot loading"></span>
+                    <span class="status-text">检查API状态...</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 工具面板容器 -->
+            <div id="toolPanel" class="tool-panel">
+                <!-- 动态内容 -->
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        // 初始化
+        checkApiStatus();
+    </script>
+</body>
+</html>

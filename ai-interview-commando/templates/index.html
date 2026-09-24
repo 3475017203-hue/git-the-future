@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 AI英语面试突击队</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, "Microsoft YaHei", sans-serif; background: #0f0f1a; color: #e0e0e0; min-height: 100vh; }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        h1 { text-align: center; color: #7c6af7; margin: 30px 0 10px; font-size: 2rem; }
+        .subtitle { text-align: center; color: #888; margin-bottom: 30px; }
+
+        .card { background: #1a1a2e; border-radius: 16px; padding: 24px; margin-bottom: 20px; border: 1px solid #2a2a4a; }
+        .card h2 { color: #a090ff; margin-bottom: 16px; font-size: 1.1rem; }
+
+        .tab-bar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab-btn { background: #1a1a2e; border: 1px solid #3a3a5a; color: #888; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+        .tab-btn:hover, .tab-btn.active { background: #7c6af7; color: #fff; border-color: #7c6af7; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .form-group { margin-bottom: 16px; }
+        label { display: block; color: #a09ff0; margin-bottom: 6px; font-size: 0.9rem; }
+        input, textarea, select { width: 100%; background: #12122a; border: 1px solid #2a2a4a; color: #e0e0e0; padding: 10px 14px; border-radius: 8px; font-size: 0.95rem; outline: none; transition: border 0.2s; }
+        input:focus, textarea:focus, select:focus { border-color: #7c6af7; }
+        textarea { resize: vertical; min-height: 100px; }
+
+        .btn { background: linear-gradient(135deg, #7c6af7, #a090ff); color: #fff; border: none; padding: 12px 28px; border-radius: 10px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: transform 0.2s, box-shadow 0.2s; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(124, 106, 247, 0.4); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-outline { background: transparent; border: 1px solid #7c6af7; color: #a090ff; }
+        .btn-sm { padding: 6px 14px; font-size: 0.85rem; }
+
+        .msg { padding: 14px 18px; border-radius: 10px; margin-bottom: 14px; line-height: 1.6; font-size: 0.95rem; }
+        .msg-ai { background: #1e1e3a; border-left: 3px solid #7c6af7; }
+        .msg-user { background: #2a1e3a; border-left: 3px solid #ff6b9d; }
+        .msg-system { background: #1a2a1a; border-left: 3px solid #4caf50; }
+
+        .qa-item { background: #12122a; border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+        .qa-q { color: #a090ff; font-weight: 600; margin-bottom: 8px; }
+        .qa-a { color: #e0e0e0; margin-bottom: 8px; }
+        .qa-feedback { background: #1a1a30; border-radius: 8px; padding: 12px; color: #c0c0c0; white-space: pre-wrap; font-size: 0.9rem; }
+
+        .score-badge { display: inline-block; background: linear-gradient(135deg, #f7c96a, #ff9f43); color: #1a1a2e; padding: 4px 14px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
+        .topic-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+        .topic-tag { background: #2a2a4a; color: #a09ff0; padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 0.85rem; transition: background 0.2s; }
+        .topic-tag:hover, .topic-tag.selected { background: #7c6af7; color: #fff; }
+
+        .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #7c6af7; border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .header-badge { text-align: center; margin-bottom: 20px; }
+        .header-badge span { background: linear-gradient(135deg, #7c6af7, #a09ff0); color: #fff; padding: 4px 16px; border-radius: 20px; font-size: 0.8rem; }
+
+        .result-box { background: #12122a; border-radius: 10px; padding: 16px; white-space: pre-wrap; line-height: 1.7; color: #c8c8d8; }
+        .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; }
+        .loading-overlay.show { display: flex; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🎯 AI英语面试突击队</h1>
+    <p class="subtitle">基于创新大赛获奖项目灵感 · AI口语陪练 + 智能面试反馈系统</p>
+
+    <div class="tab-bar">
+        <button class="tab-btn active" onclick="switchTab('setup')">📋 开始面试</button>
+        <button class="tab-btn" onclick="switchTab('practice')">🎤 口语陪练</button>
+        <button class="tab-btn" onclick="switchTab('history')">📜 历史记录</button>
+    </div>
+
+    <!-- ===== Tab1: 面试准备 ===== -->
+    <div id="tab-setup" class="tab-content active">
+        <div class="card">
+            <h2>第1步：设置面试目标</h2>
+            <div class="form-group">
+                <label>🎯 目标岗位</label>
+                <input type="text" id="job-position" placeholder="例如：Software Engineer, Data Analyst, 产品经理...">
+            </div>
+            <div class="form-group">
+                <label>📄 简历内容（可选）</label>
+                <textarea id="resume-text" placeholder="粘贴你的简历内容，AI将据此生成个性化问题..."></textarea>
+            </div>
+            <button class="btn" onclick="startSession()">🚀 开始面试练习</button>
+        </div>
+
+        <div id="session-area" style="display:none;">
+            <div class="card">
+                <h2>💡 自我介绍建议</h2>
+                <div id="self-intro-tips" class="result-box"></div>
+            </div>
+
+            <div class="card">
+                <h2>第2步：选择面试话题</h2>
+                <div class="topic-tags">
+                    <span class="topic-tag" data-topic="self_intro" onclick="selectTopic(this)">🪪 自我介绍</span>
+                    <span class="topic-tag" data-topic="technical" onclick="selectTopic(this)">💻 技术问题</span>
+                    <span class="topic-tag" data-topic="behavioral" onclick="selectTopic(this)">🎯 行为面试</span>
+                    <span class="topic-tag" data-topic="general" onclick="selectTopic(this)">🌐 综合问题</span>
+                </div>
+                <button class="btn" onclick="getQuestions()">🎯 生成面试问题</button>
+            </div>
+
+            <div id="questions-area" style="display:none;">
+                <div class="card">
+                    <h2>📌 面试问题</h2>
+                    <div id="questions-list" class="result-box"></div>
+                </div>
+
+                <div class="card">
+                    <h2>✏️ 你的回答</h2>
+                    <div id="question-inputs"></div>
+                    <div style="margin-top:14px">
+                        <button class="btn" onclick="submitAllAnswers()">🚀 提交所有答案</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="answers-area" style="display:none;"></div>
+
+            <div class="card">
+                <button class="btn btn-outline" onclick="generateReport()">📊 生成面试报告</button>
+                <div id="report-area" style="margin-top:16px;display:none;">
+                    <div id="report-content" class="result-box"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Tab2: 口语陪练 ===== -->
+    <div id="tab-practice" class="tab-content">
+        <div class="card">
+            <h2>🎤 场景化口语陪练</h2>
+            <div class="form-group">
+                <label>选择场景</label>
+                <select id="scenario-select">
+                    <option value="interview">💼 面试场景</option>
+                    <option value="business">📈 商务会议</option>
+                    <option value="daily">✈️ 机场出行</option>
+                    <option value="presentation">🎙️ 英文演讲</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>难度级别</label>
+                <select id="level-select">
+                    <option value="beginner">🌱 初级（简单词汇）</option>
+                    <option value="intermediate">⚡ 中级（常用表达）</option>
+                    <option value="advanced">🔥 高级（地道俚语）</option>
+                </select>
+            </div>
+            <button class="btn" onclick="startSpeechPractice()">🎙️ 开始陪练</button>
+        </div>
+
+        <div id="speech-chat" style="display:none;">
+            <div class="card">
+                <h2>💬 英语对话</h2>
+                <div id="speech-messages" style="max-height:400px;overflow-y:auto;margin-bottom:14px;"></div>
+                <div style="display:flex;gap:8px;">
+                    <textarea id="speech-input" placeholder="用英文输入你的回复..." style="flex:1;min-height:60px;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendSpeechMsg();}"></textarea>
+                    <button class="btn" onclick="sendSpeechMsg()" style="height:60px;">发送</button>
+                </div>
+                <p style="color:#666;font-size:0.8rem;margin-top:6px;">💡 按Enter发送，Shift+Enter换行</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Tab3: 历史 ===== -->
+    <div id="tab-history" class="tab-content">
+        <div class="card">
+            <h2>📜 使用说明</h2>
+            <p style="color:#888;line-height:1.8;">
+                · 每次面试会话会自动保存在本地数据库<br>
+                · 切换「口语陪练」标签页进行场景化英语对话练习<br>
+                · AI反馈包含语法、表达、逻辑等多维度评分<br>
+                · 完成后生成面试报告，了解自己的优势和薄弱点<br><br>
+                <strong style="color:#a09ff0;">💡 提示：</strong>定期练习，持续提升！
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Loading遮罩 -->
+<div class="loading-overlay" id="loading">
+    <div style="background:#1a1a2e;padding:30px 50px;border-radius:16px;text-align:center;">
+        <div class="spinner" style="width:30px;height:30px;border-width:3px;"></div>
+        <p style="margin-top:14px;color:#a09ff0;">AI思考中...</p>
+    </div>
+</div>
+
+<script>
+let currentSession = null;
+let currentTopic = 'general';
+let speechHistory = [];
+
+function switchTab(name) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('tab-' + name).classList.add('active');
+}
+
+function selectTopic(el) {
+    document.querySelectorAll('.topic-tag').forEach(t => t.classList.remove('selected'));
+    el.classList.add('selected');
+    currentTopic = el.dataset.topic;
+}
+
+function showLoading(show=true) {
+    document.getElementById('loading').classList.toggle('show', show);
+}
+
+async function startSession() {
+    const job = document.getElementById('job-position').value.trim();
+    const resume = document.getElementById('resume-text').value.trim();
+    if (!job) { alert('请输入目标岗位！'); return; }
+
+    showLoading();
+    try {
+        const res = await fetch('/api/start-session', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({job_position: job, resume_text: resume})
+        });
+        const data = await res.json();
+        currentSession = data.session_id;
+        document.getElementById('self-intro-tips').textContent = data.self_intro_tips;
+        document.getElementById('session-area').style.display = 'block';
+        document.getElementById('questions-area').style.display = 'none';
+        document.getElementById('answers-area').style.display = 'none';
+        document.getElementById('report-area').style.display = 'none';
+    } catch(e) { alert('错误：' + e); }
+    showLoading(false);
+}
+
+async function getQuestions() {
+    if (!currentSession) { alert('请先开始面试！'); return; }
+    showLoading();
+    try {
+        const res = await fetch('/api/ask-questions', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({session_id: currentSession, topic: currentTopic})
+        });
+        const data = await res.json();
+        const qList = document.getElementById('questions-list');
+        qList.textContent = data.questions;
+        qList.style.display = 'block';
+
+        // 提取问题填充输入框
+        const lines = data.questions.split('\n').filter(l => l.trim());
+        let html = '';
+        let qIdx = 0;
+        lines.forEach((line, i) => {
+            if (line.match(/^\d+[\..、]/)) {
+                qIdx++;
+                html += `<div class="qa-item">
+                    <div class="qa-q">${line}</div>
+                    <textarea class="answer-input" data-q="${qIdx}" placeholder="用英文回答..." style="width:100%;min-height:80px;background:#0f0f1a;border:1px solid #2a2a4a;color:#e0e0e0;border-radius:8px;padding:10px;resize:vertical;"></textarea>
+                </div>`;
+            }
+        });
+        document.getElementById('question-inputs').innerHTML = html;
+        document.getElementById('questions-area').style.display = 'block';
+        document.getElementById('answers-area').innerHTML = '';
+    } catch(e) { alert('错误：' + e); }
+    showLoading(false);
+}
+
+async function submitAllAnswers() {
+    const inputs = document.querySelectorAll('.answer-input');
+    const job = document.getElementById('job-position').value;
+    const qList = document.getElementById('questions-list').textContent;
+    let html = '';
+    let idx = 0;
+
+    for (const inp of inputs) {
+        const answer = inp.value.trim();
+        if (!answer) continue;
+        idx++;
+        showLoading();
+        try {
+            const res = await fetch('/api/review-answer', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    question: `Question ${idx}`,
+                    answer: answer,
+                    job_position: job
+                })
+            });
+            const data = await res.json();
+            html += `<div class="qa-item">
+                <div class="qa-q">Q${idx}</div>
+                <div class="qa-a">你的回答：${answer}</div>
+                <div class="qa-feedback">${data.feedback}</div>
+            </div>`;
+
+            // 保存到服务器
+            await fetch('/api/save-qa', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    session_id: currentSession,
+                    question: `Q${idx}`,
+                    answer: answer,
+                    feedback: data.feedback,
+                    score: 7
+                })
+            });
+        } catch(e) { html += `<div class="qa-item"><div>错误：${e}</div></div>`; }
+        showLoading(false);
+    }
+
+    document.getElementById('answers-area').innerHTML = html;
+    document.getElementById('answers-area').style.display = 'block';
+    document.getElementById('answers-area').scrollIntoView({behavior: 'smooth'});
+}
+
+async function generateReport() {
+    if (!currentSession) return;
+    showLoading();
+    try {
+        const res = await fetch('/api/generate-report', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({session_id: currentSession})
+        });
+        const data = await res.json();
+        document.getElementById('report-content').textContent = data.report;
+        document.getElementById('report-area').style.display = 'block';
+    } catch(e) { alert('错误：' + e); }
+    showLoading(false);
+}
+
+// ===== 口语陪练 =====
+async function startSpeechPractice() {
+    const scenario = document.getElementById('scenario-select').value;
+    const level = document.getElementById('level-select').value;
+    showLoading();
+    try {
+        const res = await fetch('/api/speech-practice', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({scenario, level})
+        });
+        const data = await res.json();
+        speechHistory = [{role: 'assistant', content: data.response}];
+        renderSpeechMsgs();
+        document.getElementById('speech-chat').style.display = 'block';
+    } catch(e) { alert('错误：' + e); }
+    showLoading(false);
+}
+
+async function sendSpeechMsg() {
+    const input = document.getElementById('speech-input');
+    const msg = input.value.trim();
+    if (!msg) return;
+    speechHistory.push({role: 'user', content: msg});
+    input.value = '';
+    renderSpeechMsgs();
+    showLoading();
+    try {
+        const res = await fetch('/api/chat-scenario', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({message: msg, history: speechHistory})
+        });
+        const data = await res.json();
+        speechHistory.push({role: 'assistant', content: data.response});
+    } catch(e) { speechHistory.push({role: 'assistant', content: 'Error: ' + e}); }
+    showLoading(false);
+    renderSpeechMsgs();
+}
+
+function renderSpeechMsgs() {
+    const el = document.getElementById('speech-messages');
+    el.innerHTML = speechHistory.map(m => {
+        const cls = m.role === 'user' ? 'msg-user' : 'msg-ai';
+        const prefix = m.role === 'user' ? '🧑 你' : '🤖 AI';
+        return `<div class="msg ${cls}"><strong>${prefix}:</strong><br>${escapeHtml(m.content)}</div>`;
+    }).join('');
+    el.scrollTop = el.scrollHeight;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML.replace(/\n/g, '<br>');
+}
+</script>
+</body>
+</html>

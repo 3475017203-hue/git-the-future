@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}笔记管理 - AI自习伙伴{% endblock %}
+{% block content %}
+<br>
+<div class="card">
+    <div class="card-title">
+        📝 笔记管理
+        <a href="/note/new" class="btn btn-primary btn-sm" style="margin-left:auto;">+ 新建笔记</a>
+    </div>
+    
+    <div class="toolbar">
+        <div class="search-box">
+            <input type="search" id="searchInput" placeholder="🔍 搜索笔记标题或内容..." value="{{ search }}" onkeydown="if(event.key==='Enter') searchNotes()">
+        </div>
+        <select id="subjectFilter" onchange="filterBySubject()">
+            <option value="">全部科目</option>
+            {% for s in subjects %}
+            <option value="{{ s.id }}" {% if current_subject == s.id %}selected{% endif %}>{{ s.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    {% if notes %}
+    <table class="table">
+        <thead>
+            <tr>
+                <th>标题</th>
+                <th>科目</th>
+                <th>更新时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for note in notes %}
+            <tr>
+                <td>
+                    <a href="/note/{{ note.id }}" style="color:#333; text-decoration:none; font-weight:500;">
+                        📄 {{ note.title }}
+                    </a>
+                </td>
+                <td><span class="tag tag-blue">{{ note.subject_name }}</span></td>
+                <td style="color:#888; font-size:13px;">{{ note.updated_at|datetime_format }}</td>
+                <td>
+                    <a href="/note/{{ note.id }}/edit" class="btn btn-sm btn-outline" style="padding:4px 10px; font-size:12px;">编辑</a>
+                    <button onclick="confirmDelete('/note/{{ note.id }}/delete', '确认删除这篇笔记？')" class="btn btn-sm btn-danger" style="padding:4px 10px; font-size:12px;">删除</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="text-align:center; padding:40px; color:#999;">
+        <div style="font-size:48px; margin-bottom:12px;">📝</div>
+        <p>还没有笔记，<a href="/note/new" style="color:#667eea;">创建第一篇</a>吧！</p>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function searchNotes() {
+    const q = document.getElementById('searchInput').value;
+    const s = document.getElementById('subjectFilter').value;
+    let url = '/notes?';
+    if (q) url += 'search=' + encodeURIComponent(q) + '&';
+    if (s) url += 'subject=' + encodeURIComponent(s);
+    location.href = url;
+}
+function filterBySubject() {
+    searchNotes();
+}
+</script>
+{% endblock %}

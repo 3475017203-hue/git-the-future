@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📖 路演技巧指南 - AI创新路演助手</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            color: #fff;
+            line-height: 1.8;
+        }
+        .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+        .back { color: #667eea; text-decoration: none; font-size: 0.9em; }
+        .back:hover { text-decoration: underline; }
+        
+        h1 { font-size: 2em; margin: 30px 0 10px; text-align: center; }
+        .subtitle { text-align: center; color: #a0a0c0; margin-bottom: 40px; }
+        
+        .section {
+            background: rgba(255,255,255,0.07);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        .section h2 { color: #667eea; margin-bottom: 15px; font-size: 1.3em; }
+        .section p { color: #d0d0e0; margin-bottom: 12px; }
+        
+        .tip-box {
+            background: rgba(102, 126, 234, 0.15);
+            border-left: 3px solid #667eea;
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            margin: 12px 0;
+        }
+        
+        .timeline { position: relative; padding-left: 30px; }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: rgba(102,126,234,0.3);
+        }
+        .timeline-item { margin-bottom: 20px; position: relative; }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -24px;
+            top: 6px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #667eea;
+        }
+        .timeline-item .time { color: #667eea; font-size: 0.85em; font-weight: bold; }
+        .timeline-item .content { color: #d0d0e0; }
+        
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        th { color: #667eea; }
+        td { color: #d0d0e0; font-size: 0.9em; }
+        
+        .warning {
+            background: rgba(255, 200, 87, 0.1);
+            border-left: 3px solid #ffc857;
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            color: #ffc857;
+            margin: 12px 0;
+        }
+        
+        .checklist li { margin: 8px 0; color: #d0d0e0; }
+        .checklist li::before { content: '✅ '; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back">← 返回首页</a>
+        
+        <h1>📖 创新大赛路演技巧指南</h1>
+        <p class="subtitle">基于数百个获奖路演案例总结的最佳实践</p>
+        
+        <div class="section">
+            <h2>🎯 什么是好的路演？</h2>
+            <p>路演（Pitch）是在有限时间内（通常5-10分钟），向评委/投资人清晰传达项目价值的艺术。</p>
+            <p>好的路演 = <strong>清晰的故事线</strong> + <strong>有力的数据</strong> + <strong>自信的表达</strong></p>
+            
+            <div class="tip-box">
+                💡 评委平均注意力只有前3分钟！开场的一hook至关重要，要在30秒内让评委知道：
+                "这个项目要解决什么问题，为什么重要，为什么你能做"
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>⏱️ 标准路演时间分配</h2>
+            <table>
+                <tr><th>页面</th><th>内容</th><th>建议时长</th></tr>
+                <tr><td>封面</td><td>项目名称 + 一句话介绍</td><td>5-10秒</td></tr>
+                <tr><td>痛点</td><td>市场问题有多严重</td><td>60秒</td></tr>
+                <tr><td>解决方案</td><td>你如何解决这个问题</td><td>90秒</td></tr>
+                <tr><td>核心技术</td><td>技术有何壁垒</td><td>60秒</td></tr>
+                <tr><td>市场分析</td><td>蛋糕有多大</td><td>60秒</td></tr>
+                <tr><td>商业模式</td><td>如何盈利</td><td>60秒</td></tr>
+                <tr><td>竞争优势</td><td>为何你能赢</td><td>60秒</td></tr>
+                <tr><td>团队</td><td>为什么是这个团队</td><td>60秒</td></tr>
+                <tr><td>进展</td><td>已做到什么</td><td>60秒</td></tr>
+                <tr><td>融资/结尾</td><td>需要什么 + 号召</td><td>60秒</td></tr>
+            </table>
+            <p style="color:#a0a0c0; font-size:0.85em;">* 总计约10分钟，留2分钟给评委提问</p>
+        </div>
+        
+        <div class="section">
+            <h2>🎤 演讲技巧</h2>
+            
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="time">开场（前30秒）</div>
+                    <div class="content">
+                        <strong>用数据/故事开场</strong>，不要自我介绍！<br>
+                        ❌ "大家好，我们是XX团队..."<br>
+                        ✅ "每年有500万大学生面临英语口语难题，市场缺口达2000亿..."
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="time">中间（每页）</div>
+                    <div class="content">
+                        <strong>每个要点说2件事：</strong>是什么 + 为什么重要<br>
+                        用数据说话，少用"非常好"、"很棒"等空洞词汇
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="time">结尾（最后30秒）</div>
+                    <div class="content">
+                        <strong>给出明确CTA</strong>（Call to Action）<br>
+                        "我们本轮融资500万，用于XX研发和市场推广，期待与各位合作！"
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>💡 评委最爱看的4个要素</h2>
+            <ol class="checklist">
+                <li><strong>真实痛点</strong> — 不是YY出来的需求，是深入调研后的真实问题</li>
+                <li><strong>差异化创新</strong> — 和别人有什么不同？为什么你能做？</li>
+                <li><strong>清晰商业模式</strong> — 如何赚钱？市场规模是否支撑？</li>
+                <li><strong>团队执行力</strong> — 团队背景与项目的匹配度，已有的进展</li>
+            </ol>
+        </div>
+        
+        <div class="section">
+            <h2>⚠️ 路演常见错误</h2>
+            <div class="warning">
+                ❌ 技术细节讲太多 — 评委关心的是市场和商业，不是你的代码架构
+            </div>
+            <div class="warning">
+                ❌ 只讲概念不讲数据 — "我们的产品非常好"不如"准确率95%，已服务500用户"
+            </div>
+            <div class="warning">
+                ❌ 回避竞争分析 — 评委一定会问"如果有巨头跟进怎么办"，提前准备好答案
+            </div>
+            <div class="warning">
+                ❌ 时间超长 — 评委的时间很宝贵，超时是大忌，控制在规定时间内
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>🚀 赛前准备清单</h2>
+            <ul class="checklist">
+                <li>路演脚本背熟（不是背台词，是理解核心逻辑）</li>
+                <li>控制在规定时间内，提前演练3遍以上</li>
+                <li>准备好Q&A，预设20个常见问题及答案</li>
+                <li>PPT每页不超过3个要点，字号够大</li>
+                <li>了解团队每个人的背景，能回答任何队员的问题</li>
+                <li>准备2个版本：5分钟版和10分钟版</li>
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h2>🎯 Q&A环节应对技巧</h2>
+            <p>常见问题及应答策略：</p>
+            <table>
+                <tr><th>问题</th><th>策略</th></tr>
+                <tr><td>市场规模多大？</td><td>给具体数字（ TAM/SAM/SOM）</td></tr>
+                <tr><td>护城河是什么？</td><td>技术/数据/品牌/网络效应</td></tr>
+                <tr><td>如果有腾讯跟进怎么办？</td><td>专注细分市场，快速迭代</td></tr>
+                <tr><td>你们团队有什么优势？</td><td>背景与项目的直接关联</td></tr>
+                <tr><td>盈利模式是什么？</td><td>清晰的收入来源和单位经济模型</td></tr>
+            </table>
+        </div>
+        
+        <p style="text-align:center; color:#8888aa; margin-top:30px;">
+            🎯 祝你的项目路演成功！<br>
+            <a href="/" style="color:#667eea;">← 返回工具首页</a>
+        </p>
+    </div>
+</body>
+</html>

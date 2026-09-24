@@ -1,0 +1,17 @@
+# AI多智能体研究助手 依赖
+# AI Multi-Agent Research Assistant Dependencies
+
+# Web框架
+Flask>=2.3.0
+
+# HTTP请求
+requests>=2.31.0
+
+# 唯一ID生成
+# (内置uuid，无需额外安装)
+
+# 注意：API调用无需额外SDK，直接使用requests
+# 支持以下API后端（任选其一）：
+# - 硅基流动（推荐，免费额度）: export SILICONFLOW_API_KEY=your_key
+# - DeepSeek: export DEEPSEEK_API_KEY=your_key
+# - OpenAI: export OPENAI_API_KEY=your_key

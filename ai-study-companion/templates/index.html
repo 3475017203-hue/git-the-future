@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}首页 - AI自习伙伴{% endblock %}
+{% block content %}
+<br>
+<div class="card" style="text-align:center; padding: 40px 24px;">
+    <h2 style="font-size:24px; margin-bottom:8px;">👋 欢迎回来！</h2>
+    <p style="color:#888; font-size:15px;">每天进步一点点，遇见更好的自己 ✨</p>
+</div>
+
+<!-- 统计卡片 -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">📚</div>
+        <div class="stat-value">{{ subject_count }}</div>
+        <div class="stat-label">学习科目</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📝</div>
+        <div class="stat-value">{{ note_count }}</div>
+        <div class="stat-label">笔记总数</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🃏</div>
+        <div class="stat-value">{{ flashcard_count }}</div>
+        <div class="stat-label">闪卡数量</div>
+    </div>
+    <div class="stat-card highlight">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-value">{{ due_review }}</div>
+        <div class="stat-label">待复习</div>
+    </div>
+</div>
+
+<div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+    <!-- 快捷入口 -->
+    <div class="card">
+        <div class="card-title">🚀 快捷入口</div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <a href="/note/new" class="btn btn-primary" style="justify-content:center;">
+                ✏️ 新建笔记
+            </a>
+            <a href="/flashcard/new" class="btn btn-success" style="justify-content:center;">
+                🃏 新建闪卡
+            </a>
+            <a href="/ask" class="btn btn-outline" style="justify-content:center; border-color:#764ba2; color:#764ba2;">
+                💬 AI问答
+            </a>
+            <a href="/review" class="btn btn-outline" style="justify-content:center; border-color:#ff6b6b; color:#ff6b6b;">
+                🧠 去复习
+            </a>
+            <a href="/notes" class="btn btn-outline" style="justify-content:center; border-color:#4CAF50; color:#4CAF50;">
+                📖 浏览笔记
+            </a>
+            <a href="/subjects" class="btn btn-outline" style="justify-content:center;">
+                📂 科目管理
+            </a>
+        </div>
+        
+        {% if due_review > 0 %}
+        <div style="margin-top:16px; padding:12px; background:#fff3e0; border-radius:10px; text-align:center;">
+            <a href="/review" style="color:#e65100; font-weight:600; text-decoration:none; font-size:15px;">
+                🔥 你有 {{ due_review }} 张闪卡需要复习！
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- 学习记录 -->
+    <div class="card">
+        <div class="card-title">📊 今日动态</div>
+        {% if logs %}
+            {% for log in logs %}
+            <div class="log-item">
+                <span class="log-icon">
+                    {% if 'create' in log.action %}✨{% elif 'delete' in log.action %}🗑️{% elif 'review' in log.action %}🧠{% elif 'generate' in log.action %}🔮{% elif 'ask' in log.action %}💬{% else %}📌{% endif %}
+                </span>
+                <span class="log-time">{{ log.created_at|datetime_format }}</span>
+                <span class="log-text">{{ log.detail or log.action }}</span>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p style="color:#999; text-align:center; padding:20px;">还没有学习记录，开始学习吧！</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- AI学习助手介绍 -->
+<div class="card">
+    <div class="card-title">🤖 AI自习伙伴能帮你做什么？</div>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px;">
+        <div style="padding:16px; background:#f8f9ff; border-radius:12px; text-align:center;">
+            <div style="font-size:28px; margin-bottom:8px;">📝</div>
+            <div style="font-weight:600; margin-bottom:4px;">智能笔记管理</div>
+            <div style="font-size:13px; color:#666;">添加、整理、搜索课程笔记</div>
+        </div>
+        <div style="padding:16px; background:#f8f9ff; border-radius:12px; text-align:center;">
+            <div style="font-size:28px; margin-bottom:8px;">🧠</div>
+            <div style="font-weight:600; margin-bottom:4px;">间隔重复记忆</div>
+            <div style="font-size:13px; color:#666;">SM-2算法驱动，科学复习计划</div>
+        </div>
+        <div style="padding:16px; background:#f8f9ff; border-radius:12px; text-align:center;">
+            <div style="font-size:28px; margin-bottom:8px;">💬</div>
+            <div style="font-weight:600; margin-bottom:4px;">AI问答助手</div>
+            <div style="font-size:13px; color:#666;">任何学科问题，AI即时解答</div>
+        </div>
+        <div style="padding:16px; background:#f8f9ff; border-radius:12px; text-align:center;">
+            <div style="font-size:28px; margin-bottom:8px;">🔮</div>
+            <div style="font-weight:600; margin-bottom:4px;">AI自动出题</div>
+            <div style="font-size:13px; color:#666;">根据笔记自动生成练习题</div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

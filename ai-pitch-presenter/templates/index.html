@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 AI路演答辩助手 - 创新大赛备赛神器</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        /* 头部 */
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 30px;
+        }
+        header h1 { font-size: 2.2em; color: #fff; margin-bottom: 10px; }
+        header h1 span { color: #e94560; }
+        header p { color: #888; font-size: 1.1em; }
+
+        /* AI状态栏 */
+        .ai-status {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .ai-status .label { color: #888; font-size: 0.9em; }
+        .backend-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            background: rgba(255,255,255,0.1);
+            color: #aaa;
+        }
+        .backend-badge.active { background: rgba(46,213,115,0.2); color: #2ed573; }
+        .backend-badge.inactive { background: rgba(255,107,107,0.15); color: #ff6b6b; }
+
+        /* 标签页 */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 12px 24px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.08);
+            color: #aaa;
+            cursor: pointer;
+            border: none;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        .tab:hover { background: rgba(255,255,255,0.15); color: #fff; }
+        .tab.active {
+            background: linear-gradient(135deg, #e94560, #c23a51);
+            color: #fff;
+        }
+
+        /* 内容区 */
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        /* 卡片 */
+        .card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        .card h3 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card h3::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: #e94560;
+            border-radius: 2px;
+        }
+
+        /* 表单 */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+        .form-group { margin-bottom: 12px; }
+        .form-group label {
+            display: block;
+            color: #aaa;
+            font-size: 0.9em;
+            margin-bottom: 6px;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+        .form-group textarea { min-height: 80px; resize: vertical; }
+
+        /* 按钮 */
+        .btn {
+            padding: 12px 28px;
+            border-radius: 10px;
+            border: none;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #e94560, #c23a51);
+            color: #fff;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(233,69,96,0.4); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.2); }
+
+        /* 输出区 */
+        .output-box {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 200px;
+            margin-top: 15px;
+            white-space: pre-wrap;
+            font-size: 0.95em;
+            line-height: 1.7;
+            color: #ccc;
+            overflow-x: auto;
+        }
+        .output-box.loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #888;
+        }
+        .output-box .error { color: #ff6b6b; }
+        .output-box .success { color: #2ed573; }
+
+        /* 问题库 */
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+        }
+        .question-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .question-card:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-3px);
+        }
+        .question-card .category {
+            color: #e94560;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .question-card .question { color: #fff; font-size: 0.95em; }
+
+        /* 提示框 */
+        .tips {
+            background: rgba(46,213,115,0.1);
+            border-left: 4px solid #2ed573;
+            padding: 15px;
+            border-radius: 0 10px 10px 0;
+            margin-top: 15px;
+            font-size: 0.9em;
+            color: #aaa;
+        }
+        .tips strong { color: #2ed573; }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            header h1 { font-size: 1.6em; }
+            .tabs { gap: 5px; }
+            .tab { padding: 10px 16px; font-size: 0.9em; }
+            .form-grid { grid-template-columns: 1fr; }
+        }
+
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        .spinner {
+            display: inline-block;
+            width: 20px; height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #e94560;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏆 <span>AI路演答辩助手</span></h1>
+            <p>基于创新大赛获奖项目分析研发 · 帮你打磨出能获奖的路演方案</p>
+        </header>
+
+        <!-- AI状态 -->
+        <div class="ai-status">
+            <span class="label">AI后端状态：</span>
+            <div id="aiBackends"></div>
+        </div>
+
+        <!-- 功能标签 -->
+        <div class="tabs">
+            <button class="tab active" data-tab="project">📋 项目信息</button>
+            <button class="tab" data-tab="pitch">🎤 生成路演话术</button>
+            <button class="tab" data-tab="ppt">📊 生成PPT大纲</button>
+            <button class="tab" data-tab="qa">❓ 模拟评委提问</button>
+            <button class="tab" data-tab="answer">💬 回答问题</button>
+            <button class="tab" data-tab="optimize">🚀 优化方案</button>
+        </div>
+
+        <!-- 项目信息 -->
+        <div id="panel-project" class="panel active">
+            <div class="card">
+                <h3>参赛项目基本信息</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>项目名称 *</label>
+                        <input type="text" id="p-name" placeholder="例如：智诊AI - 口腔病理智能诊断系统">
+                    </div>
+                    <div class="form-group">
+                        <label>项目领域</label>
+                        <select id="p-field">
+                            <option value="">请选择</option>
+                            <option value="AI+医疗">AI+医疗</option>
+                            <option value="AI+教育">AI+教育</option>
+                            <option value="AI+内容创作">AI+内容创作</option>
+                            <option value="AI+法律">AI+法律</option>
+                            <option value="AI+金融">AI+金融</option>
+                            <option value="AI+农业">AI+农业</option>
+                            <option value="AI+制造">AI+制造</option>
+                            <option value="AI+文化">AI+文化</option>
+                            <option value="AI+其他">AI+其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>目标用户</label>
+                        <input type="text" id="p-target" placeholder="例如：基层医院口腔科医生">
+                    </div>
+                    <div class="form-group">
+                        <label>当前进展</label>
+                        <select id="p-progress">
+                            <option value="">请选择</option>
+                            <option value="创意阶段">💡 创意阶段</option>
+                            <option value="原型开发">🔧 原型开发</option>
+                            <option value="小范围试点">🧪 小范围试点</option>
+                            <option value="正式运营">🚀 正式运营</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>核心内容</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>核心问题（解决了什么痛点）</label>
+                        <textarea id="p-problem" placeholder="描述目标用户面临的具体问题，越具体越好"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>解决方案（你们怎么做）</label>
+                        <textarea id="p-solution" placeholder="你们的产品/服务是什么，核心差异点在哪"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>技术方案</label>
+                        <textarea id="p-tech" placeholder="使用的技术栈、算法、模型等"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>商业模式（怎么赚钱）</label>
+                        <textarea id="p-business" placeholder="收入来源、定价策略、盈利预期"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>团队信息</label>
+                        <textarea id="p-team" placeholder="团队成员背景、学科优势、相关经验"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>竞争优势</label>
+                        <textarea id="p-advantage" placeholder="相比竞争对手，你们的核心优势是什么"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>潜在风险</label>
+                        <textarea id="p-risks" placeholder="项目可能面临的风险和挑战"></textarea>
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="saveProject()">💾 保存项目信息</button>
+                <div id="save-status" style="margin-top:10px;color:#2ed573;display:none">✅ 保存成功！</div>
+            </div>
+        </div>
+
+        <!-- 生成路演话术 -->
+        <div id="panel-pitch" class="panel">
+            <div class="card">
+                <h3>生成路演话术</h3>
+                <p style="color:#888;margin-bottom:15px;">基于项目信息，AI生成专业的比赛路演演讲稿</p>
+                <div class="form-group">
+                    <label>路演时长</label>
+                    <select id="pitch-duration">
+                        <option value="5">5分钟（标准路演）</option>
+                        <option value="3">3分钟（简短路演）</option>
+                        <option value="7">7分钟（完整路演）</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="generatePitch()">🎤 一键生成路演话术</button>
+                <div id="pitch-output" class="output-box" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- 生成PPT大纲 -->
+        <div id="panel-ppt" class="panel">
+            <div class="card">
+                <h3>生成PPT大纲</h3>
+                <p style="color:#888;margin-bottom:15px;">AI设计专业的参赛PPT结构，每页核心内容一目了然</p>
+                <div class="form-group">
+                    <label>PPT模板</label>
+                    <select id="ppt-template">
+                        <option value="standard">标准版（10页）- 完整展示</option>
+                        <option value="compact">精简版（5页）- 快速路演</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="generatePPT()">📊 生成PPT大纲</button>
+                <div id="ppt-output" class="output-box" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- 模拟评委提问 -->
+        <div id="panel-qa" class="panel">
+            <div class="card">
+                <h3>评委问题库</h3>
+                <p style="color:#888;margin-bottom:15px;">历年大赛评委最高频的问题，点击可查看分类</p>
+                <div id="question-categories" class="question-grid"></div>
+            </div>
+            <div class="card">
+                <h3>AI模拟评委提问</h3>
+                <p style="color:#888;margin-bottom:15px;">根据你的项目信息，AI生成针对性的评委问题</p>
+                <div class="form-group">
+                    <label>问题类型（可选）</label>
+                    <select id="qa-category">
+                        <option value="">全部类型</option>
+                        <option value="项目概述">项目概述</option>
+                        <option value="技术创新">技术创新</option>
+                        <option value="商业模式">商业模式</option>
+                        <option value="团队与进展">团队与进展</option>
+                        <option value="竞争分析">竞争分析</option>
+                        <option value="社会价值">社会价值</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="simulateQA()">❓ 模拟评委提问</button>
+                <div id="qa-output" class="output-box" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- 回答问题 -->
+        <div id="panel-answer" class="panel">
+            <div class="card">
+                <h3>回答评委问题</h3>
+                <p style="color:#888;margin-bottom:15px;">输入评委问题，AI生成专业、有说服力的回答</p>
+                <div class="form-group">
+                    <label>输入评委问题</label>
+                    <textarea id="answer-question" placeholder="输入你想回答的评委问题，例如：你们项目相比竞争对手有什么优势？"></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="generateAnswer()">💬 生成回答</button>
+                <div id="answer-output" class="output-box" style="display:none;"></div>
+            </div>
+            <div class="tips">
+                <strong>💡 回答技巧：</strong>评委喜欢听到具体的数字和案例，而不是空泛的描述。例如不要说"我们很有优势"，要说"我们的准确率比竞品高15%，已在国内3家三甲医院试点"。
+            </div>
+        </div>
+
+        <!-- 优化方案 -->
+        <div id="panel-optimize" class="panel">
+            <div class="card">
+                <h3>项目诊断与优化</h3>
+                <p style="color:#888;margin-bottom:15px;">AI评审专家为你把脉，指出项目薄弱点，给出改进建议</p>
+                <div class="tips" style="margin-bottom:15px;">
+                    <strong>🎯 评审维度：</strong>项目定位 · 痛点真实性 · 技术壁垒 · 商业模式 · 社会价值 · 团队展示
+                </div>
+                <button class="btn btn-primary" onclick="optimizeProject()">🚀 开始诊断优化</button>
+                <div id="optimize-output" class="output-box" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab切换
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // 加载AI状态
+        fetch('/api/ai-status').then(r => r.json()).then(data => {
+            const el = document.getElementById('aiBackends');
+            data.backends.forEach(b => {
+                const badge = document.createElement('span');
+                badge.className = 'backend-badge ' + (b.enabled ? 'active' : 'inactive');
+                badge.textContent = b.display_name + (b.enabled ? ' ✓' : ' ✗');
+                el.appendChild(badge);
+            });
+        });
+
+        // 加载评委问题库
+        fetch('/api/judge-questions').then(r => r.json()).then(data => {
+            const grid = document.getElementById('question-categories');
+            data.categories.forEach(cat => {
+                cat.questions.slice(0, 2).forEach(q => {
+                    const card = document.createElement('div');
+                    card.className = 'question-card';
+                    card.innerHTML = `<div class="category">${cat.category}</div><div class="question">${q}</div>`;
+                    card.onclick = () => {
+                        document.getElementById('answer-question').value = q;
+                        document.querySelector('[data-tab=answer]').click();
+                    };
+                    grid.appendChild(card);
+                });
+            });
+        });
+
+        // 获取项目信息
+        function getProjectInfo() {
+            return {
+                name: document.getElementById('p-name').value,
+                field: document.getElementById('p-field').value,
+                target_users: document.getElementById('p-target').value,
+                core_problem: document.getElementById('p-problem').value,
+                solution: document.getElementById('p-solution').value,
+                tech_stack: document.getElementById('p-tech').value,
+                business_model: document.getElementById('p-business').value,
+                team_info: document.getElementById('p-team').value,
+                current_progress: document.getElementById('p-progress').value,
+                advantages: document.getElementById('p-advantage').value,
+                risks: document.getElementById('p-risks').value,
+            };
+        }
+
+        function showLoading(el, text = 'AI思考中') {
+            el.className = 'output-box loading';
+            el.style.display = 'block';
+            el.innerHTML = `<span class="spinner"></span> ${text}<span class="loading-dots"></span>`;
+        }
+
+        function showError(el, msg) {
+            el.className = 'output-box';
+            el.innerHTML = `<span class="error">❌ 错误: ${msg}</span>`;
+        }
+
+        // 保存项目
+        function saveProject() {
+            const data = getProjectInfo();
+            if (!data.name) { alert('请填写项目名称'); return; }
+            fetch('/api/save-project', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(r => r.json()).then(() => {
+                const s = document.getElementById('save-status');
+                s.style.display = 'block';
+                setTimeout(() => s.style.display = 'none', 3000);
+            });
+        }
+
+        // 生成路演话术
+        function generatePitch() {
+            const out = document.getElementById('pitch-output');
+            const info = getProjectInfo();
+            if (!info.name && !info.core_problem) { showError(out, '请先填写项目信息'); return; }
+            showLoading(out, '生成路演话术');
+            fetch('/api/generate-pitch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...info, duration: parseInt(document.getElementById('pitch-duration').value) })
+            }).then(r => r.json()).then(d => {
+                if (d.error) showError(out, d.error);
+                else {
+                    out.className = 'output-box success';
+                    out.textContent = d.content;
+                }
+            }).catch(e => showError(out, e.message));
+        }
+
+        // 生成PPT
+        function generatePPT() {
+            const out = document.getElementById('ppt-output');
+            const info = getProjectInfo();
+            if (!info.name && !info.core_problem) { showError(out, '请先填写项目信息'); return; }
+            showLoading(out, '生成PPT大纲');
+            fetch('/api/generate-ppt', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...info, template_type: document.getElementById('ppt-template').value })
+            }).then(r => r.json()).then(d => {
+                if (d.error) showError(out, d.error);
+                else {
+                    out.className = 'output-box';
+                    out.textContent = d.content;
+                }
+            }).catch(e => showError(out, e.message));
+        }
+
+        // 模拟评委提问
+        function simulateQA() {
+            const out = document.getElementById('qa-output');
+            const info = getProjectInfo();
+            if (!info.name && !info.core_problem) { showError(out, '请先填写项目信息'); return; }
+            showLoading(out, '模拟评委提问');
+            fetch('/api/simulate-qa', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ project_info: info, category: document.getElementById('qa-category').value })
+            }).then(r => r.json()).then(d => {
+                if (d.error) showError(out, d.error);
+                else {
+                    out.className = 'output-box';
+                    out.textContent = d.content;
+                }
+            }).catch(e => showError(out, e.message));
+        }
+
+        // 生成回答
+        function generateAnswer() {
+            const out = document.getElementById('answer-output');
+            const info = getProjectInfo();
+            const question = document.getElementById('answer-question').value;
+            if (!question) { showError(out, '请输入评委问题'); return; }
+            showLoading(out, '生成回答');
+            fetch('/api/answer-question', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ project_info: info, question })
+            }).then(r => r.json()).then(d => {
+                if (d.error) showError(out, d.error);
+                else {
+                    out.className = 'output-box';
+                    out.textContent = d.content;
+                }
+            }).catch(e => showError(out, e.message));
+        }
+
+        // 优化项目
+        function optimizeProject() {
+            const out = document.getElementById('optimize-output');
+            const info = getProjectInfo();
+            if (!info.name && !info.core_problem) { showError(out, '请先填写项目信息'); return; }
+            showLoading(out, '项目诊断中');
+            fetch('/api/optimize-project', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(info)
+            }).then(r => r.json()).then(d => {
+                if (d.error) showError(out, d.error);
+                else {
+                    out.className = 'output-box';
+                    out.textContent = d.content;
+                }
+            }).catch(e => showError(out, e.message));
+        }
+    </script>
+</body>
+</html>

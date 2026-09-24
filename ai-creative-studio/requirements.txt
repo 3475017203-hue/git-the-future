@@ -1,0 +1,21 @@
+# AI多模态创意工作室 依赖
+# ==========================
+
+# Web框架
+Flask>=2.3.0
+
+# HTTP请求
+requests>=2.31.0
+
+# YAML配置
+PyYAML>=6.0
+
+# PDF解析
+PyPDF2>=3.0.0
+
+# Word文档解析
+python-docx>=1.0.0
+
+# 注意：还需要配置环境变量使用AI能力
+# SILICONFLOW_API_KEY=your_key   (免费额度: https://cloud.siliconflow.cn)
+# DEEPSEEK_API_KEY=your_key

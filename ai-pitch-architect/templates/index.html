@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 AI创新路演助手 - 一键生成路演PPT脚本</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        .header .subtitle { color: #a0a0c0; font-size: 1.1em; }
+        .header .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-top: 15px;
+        }
+        
+        /* Main Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        /* Form Panel */
+        .panel {
+            background: rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+        }
+        .panel-title {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .form-group { margin-bottom: 16px; }
+        .form-group label {
+            display: block;
+            font-size: 0.9em;
+            color: #c0c0e0;
+            margin-bottom: 6px;
+        }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.95em;
+            transition: all 0.3s;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255,255,255,0.12);
+        }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .form-group .hint { font-size: 0.75em; color: #8888aa; margin-top: 4px; }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            width: 100%;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 0.9em;
+            padding: 8px 16px;
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.15); }
+        
+        /* Result Panel */
+        .result-panel { display: none; }
+        .result-panel.active { display: block; }
+        
+        .slides-grid {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .slide-card {
+            background: rgba(255,255,255,0.06);
+            border-radius: 10px;
+            padding: 14px;
+            border-left: 3px solid #667eea;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .slide-card:hover { background: rgba(255,255,255,0.1); }
+        .slide-card .slide-num {
+            font-size: 0.75em;
+            color: #667eea;
+            font-weight: bold;
+        }
+        .slide-card .slide-title { font-size: 1em; margin: 4px 0; }
+        .slide-card .slide-points { font-size: 0.8em; color: #a0a0c0; }
+        
+        .script-box {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.8;
+            display: none;
+        }
+        .script-box.active { display: block; }
+        
+        .actions-bar {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        /* Loading */
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            display: none;
+        }
+        .loading-overlay.active { display: flex; }
+        .spinner {
+            width: 50px; height: 50px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { font-size: 1.1em; }
+        .loading-step { font-size: 0.85em; color: #a0a0c0; margin-top: 8px; }
+        
+        /* History */
+        .history-section { margin-top: 30px; }
+        .history-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .history-item {
+            background: rgba(255,255,255,0.06);
+            border-radius: 10px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .history-item:hover { background: rgba(255,255,255,0.1); }
+        .history-item .name { font-weight: 600; margin-bottom: 5px; }
+        .history-item .meta { font-size: 0.8em; color: #8888aa; }
+        
+        /* Guide Link */
+        .guide-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .guide-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.9em;
+        }
+        .guide-link a:hover { text-decoration: underline; }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(0,0,0,0.85);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 0.95em;
+            transition: transform 0.3s;
+            z-index: 2000;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+        
+        /* Slide Detail Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: #2a2a3e;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal h3 { margin-bottom: 15px; color: #667eea; }
+        .modal .modal-body { color: #d0d0e0; line-height: 1.8; }
+        .modal .modal-body .point { margin: 8px 0; padding-left: 15px; border-left: 2px solid #667eea; }
+        .modal .modal-close {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: #fff;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        .modal .modal-actions { display: flex; gap: 10px; margin-top: 15px; }
+        
+        @media (max-width: 768px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .header h1 { font-size: 1.8em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎯 AI创新路演助手</h1>
+            <p class="subtitle">输入项目信息，AI一键生成专业路演脚本和PPT内容</p>
+            <span class="badge">✨ 基于创新大赛获奖项目灵感</span>
+        </div>
+        
+        <!-- Main Layout -->
+        <div class="main-layout">
+            <!-- Left: Form -->
+            <div class="panel">
+                <div class="panel-title">📋 项目信息填写</div>
+                <form id="pitchForm">
+                    <div class="form-group">
+                        <label>项目名称 *</label>
+                        <input type="text" id="project_name" placeholder="例如：智眸AI视觉检测系统" required>
+                    </div>
+                    <div class="form-group">
+                        <label>所属行业</label>
+                        <select id="industry">
+                            <option value="AI/人工智能">AI/人工智能</option>
+                            <option value="教育科技">教育科技</option>
+                            <option value="医疗健康">医疗健康</option>
+                            <option value="新能源/双碳">新能源/双碳</option>
+                            <option value="智能制造">智能制造</option>
+                            <option value="电子商务">电子商务</option>
+                            <option value="企业服务/SaaS">企业服务/SaaS</option>
+                            <option value="文化创意">文化创意</option>
+                            <option value="农业科技">农业科技</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>项目阶段</label>
+                        <select id="stage">
+                            <option value="概念阶段">概念阶段（有想法）</option>
+                            <option value="原型阶段">原型阶段（已开发Demo）</option>
+                            <option value="已有产品">已有产品（已上线）</option>
+                            <option value="已获融资">已获融资</option>
+                            <option value="已盈利">已盈利</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>核心痛点（一句话）</label>
+                        <textarea id="problem" placeholder="例如：大学生缺乏高质量的英语口语练习环境，外教一对一价格昂贵且预约困难"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>解决方案</label>
+                        <textarea id="solution" placeholder="描述你的产品或服务如何解决这个问题"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>核心技术/创新点</label>
+                        <textarea id="technology" placeholder="例如：自研大模型+情感计算+实时语音识别"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>市场规模与前景</label>
+                        <textarea id="market" placeholder="例如：K12英语教育市场超2000亿元，年增长率15%"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>商业模式</label>
+                        <textarea id="business_model" placeholder="例如：SaaS订阅制+增值服务，企业版年费2万"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>竞争优势</label>
+                        <textarea id="advantage" placeholder="例如：自研模型准确率95%，比竞品高10个百分点"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>团队介绍</label>
+                        <textarea id="team_info" placeholder="例如：创始人XX，北大计算机硕士，曾任XX公司技术总监"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>当前进展</label>
+                        <textarea id="current_status" placeholder="例如：已开发MVP，测试用户500人，付费转化率20%"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="generateBtn">
+                        🚀 生成路演内容
+                    </button>
+                </form>
+                <div class="guide-link">
+                    <a href="/guide">📖 路演技巧指南</a>
+                </div>
+            </div>
+            
+            <!-- Right: Result -->
+            <div class="panel result-panel" id="resultPanel">
+                <div class="panel-title">📊 生成结果</div>
+                
+                <div id="slidesContainer">
+                    <p style="color:#a0a0c0; margin-bottom:15px;">👇 点击任意幻灯片查看详情</p>
+                    <div class="slides-grid" id="slidesGrid"></div>
+                </div>
+                
+                <button class="btn btn-secondary" id="toggleScript" style="margin-bottom:15px;">
+                    📜 显示/隐藏路演脚本
+                </button>
+                <div class="script-box" id="scriptBox"></div>
+                
+                <div class="actions-bar">
+                    <button class="btn btn-secondary" id="downloadScript">
+                        📥 导出路演脚本
+                    </button>
+                    <button class="btn btn-secondary" id="viewSlides">
+                        🎬 幻灯片预览
+                    </button>
+                    <button class="btn btn-secondary" id="newPitch">
+                        ✨ 新建路演
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- History -->
+        <div class="history-section panel" id="historySection">
+            <div class="panel-title">📜 历史记录</div>
+            <div class="history-list" id="historyList">
+                <p style="color:#8888aa; text-align:center; padding:20px;">暂无历史记录</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text">🎯 AI正在生成路演内容...</div>
+        <div class="loading-step" id="loadingStep">正在分析项目信息...</div>
+    </div>
+    
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+    
+    <!-- Slide Detail Modal -->
+    <div class="modal-overlay" id="slideModal">
+        <div class="modal">
+            <h3 id="modalTitle">幻灯片详情</h3>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="improveSlide">💡 AI优化本页</button>
+                <button class="btn btn-secondary modal-close" onclick="closeModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let currentPitchId = null;
+        let currentSlides = [];
+        let currentSlideIndex = 0;
+        
+        // Toast
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+        
+        // Loading
+        function showLoading(step) {
+            document.getElementById('loadingOverlay').classList.add('active');
+            document.getElementById('loadingStep').textContent = step;
+        }
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+        
+        // Load history
+        async function loadHistory() {
+            try {
+                const resp = await fetch('/api/history');
+                const data = await resp.json();
+                const list = document.getElementById('historyList');
+                if (data.history && data.history.length > 0) {
+                    list.innerHTML = data.history.map(h => `
+                        <div class="history-item" onclick="loadPitch(${h.id})">
+                            <div class="name">${h.project_name}</div>
+                            <div class="meta">${h.industry || ''} · ${h.created_at}</div>
+                        </div>
+                    `).join('');
+                }
+            } catch(e) { console.error('history load failed', e); }
+        }
+        
+        // Load pitch
+        async function loadPitch(id) {
+            try {
+                showLoading('加载历史记录...');
+                const resp = await fetch(`/api/pitch/${id}`);
+                const data = await resp.json();
+                hideLoading();
+                if (data.success) {
+                    displayResult(data.pitch);
+                }
+            } catch(e) { hideLoading(); showToast('加载失败'); }
+        }
+        
+        // Generate
+        document.getElementById('pitchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('generateBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ 生成中...';
+            
+            const formData = {
+                project_name: document.getElementById('project_name').value,
+                industry: document.getElementById('industry').value,
+                stage: document.getElementById('stage').value,
+                problem: document.getElementById('problem').value,
+                solution: document.getElementById('solution').value,
+                technology: document.getElementById('technology').value,
+                market: document.getElementById('market').value,
+                business_model: document.getElementById('business_model').value,
+                advantage: document.getElementById('advantage').value,
+                team_info: document.getElementById('team_info').value,
+                current_status: document.getElementById('current_status').value,
+            };
+            
+            if (!formData.project_name.trim()) {
+                showToast('请输入项目名称');
+                btn.disabled = false;
+                btn.textContent = '🚀 生成路演内容';
+                return;
+            }
+            
+            showLoading('正在分析项目信息...');
+            await new Promise(r => setTimeout(r, 500));
+            document.getElementById('loadingStep').textContent = '正在生成10页路演内容...';
+            await new Promise(r => setTimeout(r, 800));
+            document.getElementById('loadingStep').textContent = '正在撰写演讲稿...';
+            
+            try {
+                const resp = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(formData)
+                });
+                const data = await resp.json();
+                hideLoading();
+                
+                if (data.success) {
+                    currentPitchId = data.pitch_id;
+                    currentSlides = data.slides;
+                    displayResult({pitch_script: data.script, slides: data.slides, id: data.pitch_id});
+                    document.getElementById('resultPanel').classList.add('active');
+                    document.getElementById('resultPanel').scrollIntoView({behavior: 'smooth'});
+                    showToast('✅ 路演内容生成成功！');
+                    loadHistory();
+                } else {
+                    showToast(data.message || '生成失败');
+                }
+            } catch(e) {
+                hideLoading();
+                showToast('网络错误，请重试');
+            }
+            
+            btn.disabled = false;
+            btn.textContent = '🚀 生成路演内容';
+        });
+        
+        // Display result
+        function displayResult(pitch) {
+            currentPitchId = pitch.id;
+            const slides = pitch.slides || [];
+            currentSlides = slides;
+            
+            // Render slides
+            const grid = document.getElementById('slidesGrid');
+            grid.innerHTML = slides.map((s, i) => `
+                <div class="slide-card" onclick="showSlideDetail(${i})">
+                    <div class="slide-num">第${s.slide_number}页</div>
+                    <div class="slide-title">${s.title}</div>
+                    <div class="slide-points">${(s.points||[]).slice(0,2).join(' · ')}</div>
+                </div>
+            `).join('');
+            
+            // Script
+            document.getElementById('scriptBox').textContent = pitch.pitch_script || '';
+        }
+        
+        // Slide detail
+        function showSlideDetail(index) {
+            const slide = currentSlides[index];
+            if (!slide) return;
+            currentSlideIndex = index;
+            document.getElementById('modalTitle').textContent = `📄 第${slide.slide_number}页：${slide.title}`;
+            document.getElementById('modalBody').innerHTML = `
+                <p style="color:#667eea; margin-bottom:10px;">副标题：${slide.subtitle || '-'}</p>
+                <p style="margin-bottom:10px;"><strong>🎤 演讲词：</strong></p>
+                <p style="margin-bottom:15px;">${slide.talking_point || '-'}</p>
+                <p style="margin-bottom:8px;"><strong>📌 核心要点：</strong></p>
+                ${(slide.points||[]).map(p => `<div class="point">${p}</div>`).join('')}
+                <p style="margin-top:15px;"><strong>🎨 视觉建议：</strong>${slide.visual_suggestion || '-'}</p>
+            `;
+            document.getElementById('slideModal').classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('slideModal').classList.remove('active');
+        }
+        
+        // Improve slide
+        document.getElementById('improveSlide').addEventListener('click', async () => {
+            const slide = currentSlides[currentSlideIndex];
+            if (!slide) return;
+            
+            const slideText = `标题：${slide.title}\n副标题：${slide.subtitle}\n要点：${(slide.points||[]).join('\n')}\n演讲词：${slide.talking_point}`;
+            
+            try {
+                const resp = await fetch('/api/improve_slide', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({slide_text: slideText, slide_num: slide.slide_number})
+                });
+                const data = await resp.json();
+                if (data.success && data.improved) {
+                    const imp = data.improved;
+                    slide.title = imp.title || slide.title;
+                    slide.subtitle = imp.subtitle || slide.subtitle;
+                    slide.points = imp.points || slide.points;
+                    slide.talking_point = imp.talking_point || slide.talking_point;
+                    showSlideDetail(currentSlideIndex);
+                    showToast('✨ 本页优化完成！');
+                } else {
+                    showToast(data.message || '优化失败');
+                }
+            } catch(e) { showToast('网络错误'); }
+        });
+        
+        // Toggle script
+        document.getElementById('toggleScript').addEventListener('click', () => {
+            document.getElementById('scriptBox').classList.toggle('active');
+        });
+        
+        // Download script
+        document.getElementById('downloadScript').addEventListener('click', () => {
+            if (!currentPitchId) return;
+            window.location.href = `/api/export_script/${currentPitchId}`;
+        });
+        
+        // View slides
+        document.getElementById('viewSlides').addEventListener('click', () => {
+            if (!currentPitchId) return;
+            window.open(`/slides/${currentPitchId}`, '_blank');
+        });
+        
+        // New pitch
+        document.getElementById('newPitch').addEventListener('click', () => {
+            document.getElementById('resultPanel').classList.remove('active');
+            document.getElementById('pitchForm').reset();
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        });
+        
+        // Init
+        loadHistory();
+    </script>
+</body>
+</html>
